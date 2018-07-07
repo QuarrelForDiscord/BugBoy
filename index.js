@@ -36,6 +36,11 @@ bot.on('ready', () => {
     console.log("I'm a real botboy!")
 });
 
+function isInt(value) {
+    var x = parseFloat(value);
+    return !isNaN(value) && (x | 0) === x;
+  }
+
 bot.on('messageCreate', (message) => {
     // So the bot doesn't reply to iteself
     if (message.author.bot) return;
@@ -47,7 +52,7 @@ bot.on('messageCreate', (message) => {
         if (message.content.toLowerCase().trim() == "/bug") {
             bot.createMessage(message.channel.id, "To report a bug, please use the following template: **/bug** `name and short description of the bug` **/platform** `All, Xbox, Mobile, PC, Hololens, Other` **/details** `More details about the bug` **/severity** `How bad is it, from 1-10?`. All fields are optional, except for the title. \n You can also use the 'Report Bug' menu from within Discord UWP.")
         }
-        else if (message.content.toLowerCase().trim() == "/bug list") {
+        else if (message.content.toLowerCase().trim() == "/buglist") {
             db.collection("bugs").find().toArray(function (error, results) {
                 if (error) bot.createMessage(message.channel.id, "Database error:"+error);
                 if(results == null) bot.createMessage(message.channel.id, "Empty database!");
@@ -55,11 +60,25 @@ bot.on('messageCreate', (message) => {
                 var count = 0;
                 results.forEach(function(i, obj) {
                     if(i.details == "") i.details = "No details";
-                    resultstring+= "`" + count + "`: **"+ i.title + "**, *"+i.details+"*\n";
+                    resultstring+= "`" + i.position + "`: **"+ i.title + "**, *"+i.details+"*\n";
                     count++;
                 });
                 bot.createMessage(message.channel.id, resultstring);
             });
+        }
+        else if (message.content.toLowerCase().trim().startsWith("/bugrespond") | message.content.toLowerCase().trim().startsWith("/buganswer")) {
+            var searchstring = message.content.toLowerCase().trim().replace("/bugrespond","").replace("/buganswer","").trim();
+            var bugposition = searchstring.substring(0, searchstring.indexOf(' '));
+            var responsestring = searchstring.substring(bugposition.length);
+            if(isInt(bugposition)){
+                db.collection("bugs").updateOne({ position: parseInt(bugposition) }, {
+                    $set: { "response": responsestring },
+                }, function(err, client) {
+                    if(err) bot.createMessage(message.channel.id, "Failed to respond!");
+                    else console.log("Responded succesfully to bug!");
+                  }
+                )
+            }
         }
         else {
             //parameters are: bug title, platform, details, or severity
@@ -130,10 +149,12 @@ bot.on('messageCreate', (message) => {
             else if (severity > 10) severity = 10;
             else if (severity < 1) severity = 1;
             
-            var newObject = { title:title, details:details, platform:platform, severity:severity };  
+            var buglist = db.collection("bugs").find().toArray();
+            var position = buglist[buglist.count].position+1;
+            var newObject = { title:title, details:details, platform:platform, severity:severity, position:position };  
             db.collection("bugs").insert(newObject, null, function (error, results) {
                 if (error)  bot.createMessage(message.channel.id, "Failed to add bug report to database!");
-                bot.createMessage(message.channel.id, "**Bug:** `" + title + "`\n\n" + "**Platform:** `" + platform + "`\n\n" + "**Details:** `" + details + "`\n\n" + "**Severity** `" + severity + "`"); 
+                bot.createMessage(message.channel.id, "**Bug:** `" + title + "`\n\n" + "**Platform:** `" + platform + "`\n\n" + "**Details:** `" + details + "`\n\n" + "**Severity** `" + severity + "`"+ "`\n\n" + "**Position** `" + position);
             });
         }
     }

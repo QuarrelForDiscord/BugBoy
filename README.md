@@ -17,13 +17,13 @@ By default, platform is set to `all` and "severity" is set to `1`.
 
 ### Managing bugs
 
-**`/bug list`**: List all bugs currently reported
+**`/buglist`**: List all bugs currently reported
 
-**`/bug remove`**` <bug title or position>`: Remove the specified bug
+**`/bugremove`**` <bug position>`: Remove the specified bug
 
-**`/bug respond`**` <bug title or position>`: Remove the specified bug
+**`/bugrespond`** or **`/buganswer`**` <bug position>`: Respond to the specified bug
 
-**`/bug move`**` <old position> <new position> `: Move the specified bug
+**`/bugmove`**` <old position> <new position> `: Move the specified bug
 
 The remove, move, and respond commands are only accesible to roles with the permission to delete messages.
 
