@@ -1,15 +1,11 @@
 const Eris = require("eris");
 const mysql = require('mysql');
+var MongoClient = require("mongodb").MongoClient;
 
-var connection = mysql.createConnection({
-    host: 'sql9.freemysqlhosting.net',
-    user: 'sql9237660',
-    password: 'PKqJyQbxYm',
-    database: 'sql9237660'
+MongoClient.connect(process.env.databaseurl, function(error, db) {
+    if (error) return funcCallback(error);
+    console.log("Connected to bug report database'");
 });
-
-
-connection.connect();
 
 ///////////////////////
 //// UTILS ///////////
@@ -28,7 +24,7 @@ const catchAsync = fn => (
 ///////////////////////
 
 // Create bot
-const bot = new Eris("NDQ0ODQxOTE5ODI3MTQ4ODEz.Ddhy6A.KqQFGxYXXZzXPgVfHZXCQZAUuhY")
+const bot = new Eris(process.env.bottoken)
 
 
 bot.on('ready', () => {
