@@ -2,10 +2,10 @@ const Eris = require("eris");
 const mysql = require('mysql');
 
 var connection = mysql.createConnection({
-    host: 'sql9.freemysqlhosting.net',
-    user: 'sql9237660',
-    password: 'PKqJyQbxYm',
-    database: 'sql9237660'
+    host: process.env.sqlhost,
+    user: process.env.sqluser,
+    password: process.env.sqlpass,
+    database: process.env.sqldatabase
 });
 
 
@@ -28,7 +28,7 @@ const catchAsync = fn => (
 ///////////////////////
 
 // Create bot
-const bot = new Eris("NDQ0ODQxOTE5ODI3MTQ4ODEz.Ddhy6A.KqQFGxYXXZzXPgVfHZXCQZAUuhY")
+const bot = new Eris(process.env.bottoken)
 
 
 bot.on('ready', () => {
