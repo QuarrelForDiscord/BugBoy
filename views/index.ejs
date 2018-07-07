@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Quarrel BugBoy</title>
+    <link rel="stylesheet" href="css/style.css">
+  </head>
+  <body>
+      <%- include includes/header %>
+      <div class="subheader">
+          <div class="content">
+              <a class="login" target="Connect to Discord">LOGIN</a>
+          </div>
+      </div>
+      <div class="content">
+        <h2>BugBoy</h2>
+        <p>
+          This is our little bug tracking system: If you find a bug in Quarrel, please head to the Discord server, go to #bugs, and follow the instructions
+        </p>
+        <hr>
+        <div>
+          <% bugs.forEach(function (row) {%>
+            <div>
+                <h3><span class="gravity" data-value="<%= row.severity %>"><%= row.severity %></span><%= row.title %></h3>
+                <p class="bugdescription"><%= row.description %>></p>
+            </div>
+          <% }) %>
+
+          </div>
+      </div>
+  </body>
+</html>

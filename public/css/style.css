@@ -1,0 +1,109 @@
+body {
+  font: 14px "Segoe UI", Helvetica, Arial, sans-serif;
+  margin:0px;
+  background-color: #222326;
+  color: rgba(255,255,255,0.5);
+}
+.login{
+  font-size: 12px;
+  margin: 0;
+  padding:0;
+  color: #7289DA;
+  text-decoration: none;
+  opacity:1;
+  line-height: 36px;
+  transition: opacity 0.2s;
+  font-weight:600;
+
+}
+.login:hover{
+  opacity:0.8;
+}
+.login:active{
+  opacity:0.4;
+}
+h1{
+  font-weight: lighter;
+  text-align: center;
+  margin-top: 0px;
+  padding-bottom:24px;
+  color: #7289DA;
+  letter-spacing: 12px;
+  margin:0;
+}
+h2{
+  color: rgba(255,255,255,1);
+  font-weight: normal;
+  margin-top: 18px;
+}
+h3{
+  font-weight: normal;
+  color:rgba(255,255,255,0.8);
+  margin-top:12px;
+  margin-bottom:0;
+}
+.bugdescription{
+  margin:0;
+  margin-top:4px;
+  font-weight: 0;
+  color:rgba(255,255,255,0.5);
+}
+.gravity{
+  background-clip: padding-box;
+background-color: rgb(187, 55, 3);
+border-radius: 3px;
+color: #222326;
+display: inline-block;
+font-size: 12px;
+font-weight: 500;
+line-height: 12px;
+padding: 3px 4px;
+margin-right: 6px;
+}
+.gravity[data-value="1"]{
+background-color: rgb(31, 187, 3);
+}
+.gravity[data-value="2"]{
+background-color: rgb(3, 144, 187);
+}
+.gravity[data-value="3"]{
+    background-color: rgb(214, 175, 0);
+}
+.gravity[data-value="4"]{
+  background-color: rgb(187, 107, 3);
+}
+.gravity[data-value="5"]{
+  background-color: rgb(187, 55, 3);
+}
+.content{
+  max-width: 512px;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 12px;
+}
+#header{
+  background: #141618;
+  width: 100%;
+  z-index: 2;
+position: relative;
+}
+.subheader{
+  background-color: #1C1D20;
+}
+#headerlogo{
+  width:96px;
+  padding: 42px 0px 24px 0px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom:-12px;
+}
+
+.membersection{
+  float: right;
+  display:inline-block;
+}
+.membersection>a{
+  font-weight: normal;
+  font-size:14px;
+}
