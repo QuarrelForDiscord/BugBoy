@@ -19,11 +19,19 @@
         </p>
         <hr>
         <div>
-          <% bugs.forEach(function (row) {%>
-            <div>
-                <h3><span class="gravity" data-value="<%= row.severity %>"><%= row.severity %></span><%= row.title %></h3>
-                <p class="bugdescription"><%= row.description %>></p>
-            </div>
+          <% bugs.forEach(function (bug) {%>
+            <div class="bugcontainer">
+                <div class="bugtitle"><%= bug.title %> &nbsp;-
+                  <span class="gravity" data-value="<%= bug.severity %>"><%= bug.severity %></span>
+                  <% if(bug.platform != "all") {%>
+                    <span class="bugplatform">- <%= bug.platform %></span>
+                    <% } %> </div>
+                <p class="bugdescription"></span><%= bug.details %></p>
+                
+                <% if(bug.response != undefined) {%>
+                <div class="responsecontainer"><%= bug.response %></div>
+                <% } %>
+              </div>
           <% }) %>
 
           </div>

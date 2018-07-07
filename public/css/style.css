@@ -36,44 +36,59 @@ h2{
   font-weight: normal;
   margin-top: 18px;
 }
-h3{
+.bugcontainer{
+  padding: 12px; 
+  border-radius: 6px; 
+  margin-top: 12px; 
+  display: flex; 
+  flex-direction: column; 
+  background-color: rgba(0, 0, 0, 0.15);
+}
+.bugtitle{
   font-weight: normal;
   color:rgba(255,255,255,0.8);
-  margin-top:12px;
+  margin-top:0px;
   margin-bottom:0;
 }
 .bugdescription{
   margin:0;
-  margin-top:4px;
+  margin-top:6px;
   font-weight: 0;
   color:rgba(255,255,255,0.5);
 }
+.bugplatform{
+  color:rgba(255,255,255,0.4);
+}
+.responsecontainer{
+  margin: -12px;
+  margin-top:12px;
+  padding:12px;
+  color: #7289DA;
+  background-color: rgba(0, 0, 0, 0.15);
+  border-radius: 0px 0px 6px 6px;
+}
 .gravity{
   background-clip: padding-box;
-background-color: rgb(187, 55, 3);
 border-radius: 3px;
-color: #222326;
 display: inline-block;
 font-size: 12px;
-font-weight: 500;
+font-weight: bold;
 line-height: 12px;
-padding: 3px 4px;
-margin-right: 6px;
 }
 .gravity[data-value="1"]{
-background-color: rgb(31, 187, 3);
+color: rgb(31, 187, 3);
 }
 .gravity[data-value="2"]{
-background-color: rgb(3, 144, 187);
+color: rgb(3, 144, 187);
 }
 .gravity[data-value="3"]{
-    background-color: rgb(214, 175, 0);
+    color: rgb(214, 175, 0);
 }
 .gravity[data-value="4"]{
-  background-color: rgb(187, 107, 3);
+  color: rgb(187, 107, 3);
 }
 .gravity[data-value="5"]{
-  background-color: rgb(187, 55, 3);
+  color: rgb(187, 55, 3);
 }
 .content{
   max-width: 512px;

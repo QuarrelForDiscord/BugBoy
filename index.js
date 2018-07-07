@@ -51,9 +51,12 @@ bot.on('messageCreate', (message) => {
             db.collection("bugs").find().toArray(function (error, results) {
                 if (error) bot.createMessage(message.channel.id, "Database error:"+error);
                 if(results == null) bot.createMessage(message.channel.id, "Empty database!");
-                var resultstring;
+                var resultstring = "";
+                var count = 0;
                 results.forEach(function(i, obj) {
-                    resultstring+=row.title+"\n";
+                    if(i.details == "") i.details = "No details";
+                    resultstring+= "`" + count + "`: **"+ i.title + "**, *"+i.details+"*\n";
+                    count++;
                 });
                 bot.createMessage(message.channel.id, resultstring);
             });

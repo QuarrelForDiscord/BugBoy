@@ -21,9 +21,11 @@ By default, platform is set to `all` and "severity" is set to `1`.
 
 **`/bug remove`**` <bug title or position>`: Remove the specified bug
 
+**`/bug respond`**` <bug title or position>`: Remove the specified bug
+
 **`/bug move`**` <old position> <new position> `: Move the specified bug
 
-The remove and move commands are only accesible to roles with the permission to delete messages.
+The remove, move, and respond commands are only accesible to roles with the permission to delete messages.
 
 ## Examples
 
