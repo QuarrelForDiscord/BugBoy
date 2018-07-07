@@ -28,7 +28,7 @@
                     <% } %> </div>
                 <p class="bugdescription"></span><%= bug.details %></p>
                 
-                <% if(bug.response != undefined && bug.response != "" ) {%>
+                <% if(bug.response != undefined && bug.response != " " ) {%>
                 <div class="responsecontainer"><%= bug.response %></div>
                 <% } %>
               </div>

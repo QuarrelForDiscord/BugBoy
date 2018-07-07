@@ -68,9 +68,14 @@ bot.on('messageCreate', (message) => {
         }
         else if (message.content.toLowerCase().trim().startsWith("/bugrespond") | message.content.toLowerCase().trim().startsWith("/buganswer")) {
             var searchstring = message.content.toLowerCase().trim().replace("/bugrespond","").replace("/buganswer","").trim();
-            var bugposition = searchstring.substring(0, searchstring.indexOf(' '));
-            var responsestring = searchstring.substring(bugposition.length);
+            var bugposition = searchstring;
+            var responsestring;
+            if(!isInt(bugposition)){
+                var bugposition = searchstring.substring(0, searchstring.indexOf(' '));
+                responsestring = searchstring.substring(bugposition.length);
+            }
             if(isInt(bugposition)){
+                if(responsestring == "" || responsestring == undefined) responsestring = " ";
                 db.collection("bugs").updateOne({ position: parseInt(bugposition) }, {
                     $set: { "response": responsestring },
                 }, function(err, client) {
