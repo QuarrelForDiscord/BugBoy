@@ -2,17 +2,9 @@ const Eris = require("eris");
 const mysql = require('mysql');
 var MongoClient = require("mongodb").MongoClient;
 
-<<<<<<< HEAD
 MongoClient.connect(process.env.databaseurl, function(error, db) {
     if (error) return funcCallback(error);
     console.log("Connected to bug report database'");
-=======
-var connection = mysql.createConnection({
-    host: process.env.sqlhost,
-    user: process.env.sqluser,
-    password: process.env.sqlpass,
-    database: process.env.sqldatabase
->>>>>>> 95ed334a41039fb2fad538fc512ac4e0867948ce
 });
 
 ///////////////////////
