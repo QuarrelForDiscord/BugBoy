@@ -1,12 +1,17 @@
 const Eris = require("eris");
-const mysql = require('mysql');
-var MongoClient = require("mongodb").MongoClient;
+const MongoClient = require("mongodb").MongoClient;
+const ejs = require("ejs");
 
-MongoClient.connect(process.env.databaseurl, function(error, db) {
-    if (error) return funcCallback(error);
-    console.log("Connected to bug report database'");
-});
+require("dotenv").config();
 
+var db;
+
+MongoClient.connect(process.env.databaseurl, function(err, client) {
+    if(err) console.log("Failed to connect to database")
+    else console.log("Connected successfully to database");
+    db = client.db("bugboyreports");
+  });
+  
 ///////////////////////
 //// UTILS ///////////
 /////////////////////
@@ -19,8 +24,8 @@ const catchAsync = fn => (
     }
   );
 
-///////////////////////
-////  DISCORD BOT  ////
+/////////////////////////
+////  DISCORD BOT  /////
 ///////////////////////
 
 // Create bot
@@ -135,8 +140,8 @@ bot.connect();
 
 
 
-////////////////////////
-////     WEBSITE    ////
+//////////////////////////
+////     WEBSITE    /////
 ////////////////////////
 var express = require('express');
 var path = require('path');
@@ -166,11 +171,11 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', function(req, res, next) {
-    connection.query("SELECT * FROM Bugs", function (error, results, fields) {
-        res.render('index', {bugs:results});
-    });
-    
-  });
+    db.collection("bugs").find().toArray(function (error, results) {
+        if (error) throw error
+        else res.render('index', {bugs:results});  
+  })
+});
 
 app.use('/users', users);
 
@@ -191,5 +196,5 @@ app.use(function (err, req, res, next) {
     res.status(err.status || 500);
     res.render('error');
 });
-app.listen(3000, () => console.log("And i'm listening to port 3000!"))
+app.listen(8080, () => console.log("Listening to port 8080!"))
 module.exports = app;
