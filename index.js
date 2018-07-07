@@ -43,12 +43,11 @@ bot.on('messageCreate', (message) => {
             bot.createMessage(message.channel.id, "To report a bug, please use the following template: **/bug** `name and short description of the bug` **/platform** `All, Xbox, Mobile, PC, Hololens, Other` **/details** `More details about the bug` **/severity** `How bad is it, from 1-10?`. All fields are optional, except for the title. \n You can also use the 'Report Bug' menu from within Discord UWP.")
         }
         else if (message.content.toLowerCase().trim() == "/bug list") {
-            connection.query("SELECT * FROM Bugs", function (error, results, fields) {
-                if(error!=null)
-                    bot.createMessage(message.channel.id, "Database error:"+error);
-                if(results !=null)
+            db.collection("bugs").find().toArray(function (error, results) {
+                if (error) bot.createMessage(message.channel.id, "Database error:"+error);
+                if(results == null) bot.createMessage(message.channel.id, "Empty database!");
                 var resultstring;
-                results.forEach(function (row) {
+                results.forEach(function(i, obj) {
                     resultstring+=row.title+"\n";
                 });
                 bot.createMessage(message.channel.id, resultstring);
@@ -122,8 +121,12 @@ bot.on('messageCreate', (message) => {
             if (severity == NaN) severity = undefined;
             else if (severity > 10) severity = 10;
             else if (severity < 1) severity = 1;
-            bot.createMessage(message.channel.id, "**Bug:** `" + mysql.escape(title) + "`\n\n" + "**Platform:** `" + mysql.escape(platform) + "`\n\n" + "**Details:** `" + mysql.escape(details) + "`\n\n" + "**Severity** `" + mysql.escape(severity) + "`");
-            connection.query("INSERT INTO Bugs (title, description, platform, dateadded, datefixed, severity, position) VALUES ("+mysql.escape(title)+", "+mysql.escape(details)+", "+ mysql.escape(platform)+", CURDATE(), null,"+ mysql.escape(severity) + ", 0)")
+            
+            var newObject = { title:title, details:details, platform:platform, severity:severity };  
+            db.collection("bugs").insert(newObject, null, function (error, results) {
+                if (error)  bot.createMessage(message.channel.id, "Failed to add bug report to database!");
+                bot.createMessage(message.channel.id, "**Bug:** `" + title + "`\n\n" + "**Platform:** `" + platform + "`\n\n" + "**Details:** `" + details + "`\n\n" + "**Severity** `" + severity + "`"); 
+            });
         }
     }
 });
