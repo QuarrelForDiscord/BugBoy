@@ -79,15 +79,30 @@ line-height: 12px;
 color: rgb(31, 187, 3);
 }
 .gravity[data-value="2"]{
+  color: rgb(31, 187, 3);
+  }
+.gravity[data-value="3"]{
 color: rgb(3, 144, 187);
 }
-.gravity[data-value="3"]{
+.gravity[data-value="4"]{
+  color: rgb(3, 144, 187);
+  }
+.gravity[data-value="5"]{
     color: rgb(214, 175, 0);
 }
-.gravity[data-value="4"]{
+.gravity[data-value="6"]{
+  color: rgb(214, 175, 0);
+}
+.gravity[data-value="7"]{
   color: rgb(187, 107, 3);
 }
-.gravity[data-value="5"]{
+.gravity[data-value="8"]{
+  color: rgb(187, 107, 3);
+}
+.gravity[data-value="9"]{
+  color: rgb(187, 55, 3);
+}
+.gravity[data-value="10"]{
   color: rgb(187, 55, 3);
 }
 .content{
