@@ -80,7 +80,8 @@ bot.on('messageCreate', (message) => {
                     $set: { "response": responsestring },
                 }, function(err, client) {
                     if(err) bot.createMessage(message.channel.id, "Failed to respond!");
-                    else console.log("Responded succesfully to bug!");
+                    else if(responsestring == " ") bot.createMessage(message.channel.id, "Removed resonse from bug report " + bugposition + "!");
+                    else bot.createMessage(message.channel.id, "Responded `"+responsestring+"` to bug report " + bugposition + "!");
                   }
                 )
             }
@@ -154,20 +155,44 @@ bot.on('messageCreate', (message) => {
             else if (severity > 10) severity = 10;
             else if (severity < 1) severity = 1;
             
-            var buglist = db.collection("bugs").find().toArray();
-            var position = buglist[buglist.count].position+1;
+            db.collection("bugs").find().toArray(function (error, results) {
+            var position = results[results.length-1].position+1;
             var newObject = { title:title, details:details, platform:platform, severity:severity, position:position };  
             db.collection("bugs").insert(newObject, null, function (error, results) {
                 if (error)  bot.createMessage(message.channel.id, "Failed to add bug report to database!");
-                bot.createMessage(message.channel.id, "**Bug:** `" + title + "`\n\n" + "**Platform:** `" + platform + "`\n\n" + "**Details:** `" + details + "`\n\n" + "**Severity** `" + severity + "`"+ "`\n\n" + "**Position** `" + position);
+                const data = {
+                    "embed": {
+                      "title": "Added bug report:",
+                      "url": "https://bugboy.herokuapp.com/",
+                      "color": SeverityToColor(severity),
+                      "footer": {
+                        "text": "Platform:" + platform + " | Severity: " + severity
+                      },
+                      "fields": [
+                        {
+                          "name": "`"+position+"`: "+ title,
+                          "value": details
+                        }
+                      ]
+                    }
+                  };
+                  bot.createMessage(message.channel.id, data);
+              
             });
+        });
         }
     }
 });
 
 bot.connect();
 
-
+function SeverityToColor(input){
+    if(input == 1 || input == 2) return 2079491;
+    else if(input == 3 || input == 4) return 233659;
+    else if(input == 5 || input == 6) return 14069504;
+    else if(input == 7 || input == 8) return 12282627;
+    else if(input == 9 || input == 10) return 12269315;
+}
 
 //////////////////////////
 ////     WEBSITE    /////
