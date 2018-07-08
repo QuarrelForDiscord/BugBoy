@@ -60,7 +60,7 @@ bot.on('messageCreate', (message) => {
                 var count = 0;
                 results.forEach(function(i, obj) {
                     if(i.details == "") i.details = "No details";
-                    resultstring+= "`" + i.position + "`: **"+ i.title + "**, *"+i.details+"*\n";
+                    resultstring+=  + "`: **"+ i.title + "**, *"+i.details+"*\n `"+i.position+"`";
                     count++;
                 });
                 bot.createMessage(message.channel.id, resultstring);
@@ -82,6 +82,24 @@ bot.on('messageCreate', (message) => {
                     if(err) bot.createMessage(message.channel.id, "Failed to respond!");
                     else if(responsestring == " ") bot.createMessage(message.channel.id, "Removed resonse from bug report " + bugposition + "!");
                     else bot.createMessage(message.channel.id, "Responded `"+responsestring+"` to bug report " + bugposition + "!");
+                  }
+                )
+            }
+        }
+        else if (message.content.toLowerCase().trim().startsWith("/bugremove")) {
+            var searchstring = message.content.toLowerCase().trim().replace("/bugremove","").trim();
+            var bugposition = searchstring;
+            if(!isInt(bugposition)){
+                var bugposition = searchstring.substring(0, searchstring.indexOf(' '));
+            }
+            if(isInt(bugposition)){
+                db.collection("bugs").findOne({ position: parseInt(bugposition) }, true,
+                function(err, client) {
+                    if(client == null) bot.createMessage(message.channel.id, "That bug doesn't exist!");
+                    else {
+                        db.collection("bugs").remove({ position: parseInt(bugposition) });
+                        bot.createMessage(message.channel.id, "Removed bug report `"+bugposition+"`");
+                    }
                   }
                 )
             }
@@ -193,7 +211,20 @@ function SeverityToColor(input){
     else if(input == 7 || input == 8) return 12282627;
     else if(input == 9 || input == 10) return 12269315;
 }
-
+function reorderbugreports(removedpos){
+    db.collection("bugs").find().toArray(function (error, results) {
+        if (error) bot.createMessage(message.channel.id, "Database error:"+error);
+        if(results == null) bot.createMessage(message.channel.id, "Empty database!");
+        var resultstring = "";
+        var count = 0;
+        results.forEach(function(i, obj) {
+            if(i.position < removedpos) i.details = "No details";
+            resultstring+=  + "`: **"+ i.title + "**, *"+i.details+"*\n `"+i.position+"`";
+            count++;
+        });
+        bot.createMessage(message.channel.id, resultstring);
+    });
+}
 //////////////////////////
 ////     WEBSITE    /////
 ////////////////////////
