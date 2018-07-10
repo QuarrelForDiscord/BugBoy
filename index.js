@@ -60,7 +60,7 @@ bot.on('messageCreate', (message) => {
                 var count = 0;
                 results.forEach(function(i, obj) {
                     if(i.details == "") i.details = "No details";
-                    resultstring+=  + "`: **"+ i.title + "**, *"+i.details+"*\n `"+i.position+"`";
+                    resultstring+= "`"+i.position + "`: **"+ i.title + "**, "+i.details.trim()+" *(submitted by " + i.username+")*\n" ;
                     count++;
                 });
                 bot.createMessage(message.channel.id, resultstring);
@@ -122,7 +122,7 @@ bot.on('messageCreate', (message) => {
             var platform;
             var details;
             var severity;
-
+            var username = message.author.username + "#" + message.author.discriminator;
             for (i = 0; i < indexes.length; i++) {
                 let endPos;
                 if (indexes.length - 1 == i) endPos = message.content.length;
@@ -175,7 +175,7 @@ bot.on('messageCreate', (message) => {
             
             db.collection("bugs").find().toArray(function (error, results) {
             var position = results[results.length-1].position+1;
-            var newObject = { title:title, details:details, platform:platform, severity:severity, position:position };  
+            var newObject = { title:title, details:details, platform:platform, severity:severity, position:position, username:username };  
             db.collection("bugs").insert(newObject, null, function (error, results) {
                 if (error)  bot.createMessage(message.channel.id, "Failed to add bug report to database!");
                 const data = {
@@ -184,7 +184,7 @@ bot.on('messageCreate', (message) => {
                       "url": "https://bugboy.herokuapp.com/",
                       "color": SeverityToColor(severity),
                       "footer": {
-                        "text": "Platform:" + platform + " | Severity: " + severity
+                        "text": "Platform:" + platform + " | Severity: " + severity + " | Submitted by " + username
                       },
                       "fields": [
                         {
