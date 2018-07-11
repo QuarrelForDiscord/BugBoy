@@ -5,7 +5,7 @@ const { forEach } = require('p-iteration');
 
 require("dotenv").config();
 Array.prototype.IsAdmin = function(){
-    var adminroleids = ["446332563997327381", "302800337306255362"]
+    var adminroleids = ["304059525990973450", "302800337306255362"]
     for(var i = 0; i < adminroleids.length; i++){
         for(var j = 0; j < this.length; j++){
             if(adminroleids[i]==this[j]){
@@ -13,7 +13,6 @@ Array.prototype.IsAdmin = function(){
             }
         }
     }
-    return false;
 }
 var db;
 
