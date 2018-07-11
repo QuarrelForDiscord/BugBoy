@@ -81,7 +81,6 @@ bot.on('messageCreate', (message) => {
                     if(!i.details.trim()) i.details = " ";
                     if(!i.title.trim()) i.title = "`<missing title>`";
                     if(!i.username.trim()) i.username = "`<missing username>`";
-                    if(!i.position.trim()) i.position = "0";
                     resultstring += "`" + i.position + "`: **" + i.title.trim() + "**, " + i.details.trim() + " *(submitted by " + i.username + ")*\n";
                     count++;
                 });
@@ -160,7 +159,6 @@ bot.on('messageCreate', (message) => {
                                                 if(!reordered[i].details) reordered[i].details = " ";
                                                 if(!reordered[i].title) reordered[i].title = "`<missing title>`";
                                                 if(!reordered[i].username) reordered[i].username = "`<missing username>`";
-                                                if(!reordered[i].position) reordered[i].position = "0";
                                                 resultstring += "`" + reordered[i].position + "`: **" + reordered[i].title.trim() + "**, " + reordered[i].details.trim() + " *(submitted by " + reordered[i].username + ")*\n";
                                                 if(results[i]._id != reordered[i]._id)
                                                     db.collection("bugs").updateOne({ _id: reordered[i]._id }, { $set: { "position": reordered[i].position }});
