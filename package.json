@@ -21,6 +21,7 @@
     "mongodb": "^3.1.1",
     "morgan": "^1.9.0",
     "node-fetch": "^2.1.2",
+    "p-iteration": "^1.1.7",
     "path": "^0.12.7",
     "serve-favicon": "^2.5.0",
     "string.prototype.startswith": "^0.2.0"
