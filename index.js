@@ -70,7 +70,7 @@ bot.on('messageCreate', (message) => {
         if (message.content.toLowerCase().trim() == "/bug") {
             bot.createMessage(message.channel.id, "To report a bug, please use the following template: **/bug** `name and short description of the bug` **/platform** `All, Xbox, Mobile, PC, Hololens, Other` **/details** `More details about the bug` **/severity** `How bad is it, from 1-10?`. All fields are optional, except for the title. \n You can also use the 'Report Bug' menu from within Discord UWP.")
         } 
-        else if (message.content.toLowerCase().trim() == "/buglist") {
+        else if (message.content.toLowerCase().trim() == "/buglist" || message.content.toLowerCase().trim() == "/bugs") {
             db.collection("bugs").find().toArray(function (error, results) {
                 if (error) bot.createMessage(message.channel.id, "Database error:" + error);
                 if (results == null) bot.createMessage(message.channel.id, "Empty database!");
