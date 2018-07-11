@@ -15,28 +15,19 @@ The bare minimum for a bug report is the title, however you can add more details
 
 By default, platform is set to `all` and "severity" is set to `1`. 
 
-### Managing bugs
+### Other commands
 
-**`/buglist`**: List all bugs currently reported
+| Action      | Command(s)                      | Description                             | Example   |
+| ----------- | ------------------------------- | --------------------------------------- | --------- |
+| List bugs   | **`/bugs`**, `/buglist`         | List all the bugs                       |           |
+| Remove a bug | **`/bugremove`**, `/bugdelete` | Remove all bugs, specified by position. | `/bugremove 4, 12 2 and 3` |
+| Respond to a bug | **`/bugrespond`**, `/buganswer` | Add a response to the bug specified by index | `/bugrespond 12 this is kind of fixed` |
+| Move a bug | **`/bugmove`** | Move a bug from it's first position to a new one | `/bugmove 12 to 1` |
 
-**`/bugremove`**` <bug position>`: Remove the specified bug
 
-**`/bugrespond`** or **`/buganswer`**` <bug position>`: Respond to the specified bug
+### Notes
 
-**`/bugmove`**` <old position> <new position> `: Move the specified bug
+* Anyone can report a bug, or view the bug report list, but only members with the "Edit Guild" permission can use the other commands.
 
-The remove, move, and respond commands are only accesible to roles with the permission to delete messages.
+* The `/bugremove` and `/bugmove` can have any non-numeric characters between the bug report position. For example, `/bugmove 12 2` is just as valid as `/bugmove 12hello2` or `/bugmove 12 to the position 2`.
 
-## Examples
-
-`/bug All channels are visible no matter the permissions /details if you don't have permission to view a channel, it is still visible to you, except if something happens /platform all /severity 5`
-
-Will add the following bug report:
-
-**Title**: All channels are visible no matter the permissions
-
-**Details**: If you don't have permission to view a channel, it is still visible to you, except if something happens
-
-**Platform**: All platforms
-
-**Severity**: 5
