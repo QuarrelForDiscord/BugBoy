@@ -4,7 +4,17 @@ const ejs = require("ejs");
 const { forEach } = require('p-iteration');
 
 require("dotenv").config();
-
+Array.prototype.IsAdmin = function(){
+    var adminroleids = ["446332563997327381", "302800337306255362"]
+    for(var i = 0; i < adminroleids.length; i++){
+        for(var j = 0; j < this.length; j++){
+            if(adminroleids[i]==this[j]){
+                return true;
+            }
+        }
+    }
+    return false;
+}
 var db;
 
 MongoClient.connect(process.env.databaseurl, function (err, client) {
@@ -68,9 +78,52 @@ bot.on('messageCreate', (message) => {
     var content = message.content;
 
     if (message.content.toLowerCase().trim().startsWith("/bug")) {
-        if (message.content.toLowerCase().trim() == "/bug") {
-            bot.createMessage(message.channel.id, "To report a bug, please use the following template: **/bug** `name and short description of the bug` **/platform** `All, Xbox, Mobile, PC, Hololens, Other` **/details** `More details about the bug` **/severity** `How bad is it, from 1-10?`. All fields are optional, except for the title. \n You can also use the 'Report Bug' menu from within Discord UWP.")
-        } 
+        if(message.content.toLowerCase().trim() == "/bug"){
+
+            var adminData ={ "embed": {
+                "fields": [
+                  {
+                    "name": "Add bug report",
+                    "value": "**`/bug`**`<bug title> `**`/details`**`<more details about the bug> `**`/platform`**`<name of the platform the bug is occuring on> `**`/severity`**`<how bad the bug is, from 1-10>`"
+                  },
+                  {
+                    "name": "View bug reports",
+                    "value": "**`/bugs`**",
+                    "inline": true
+                  },
+                  {
+                    "name": "Delete bug report (multiple positions accepted)",
+                    "value": "**`/bugremove`**`<position>`"
+                  },
+                  {
+                    "name": "Move bug report",
+                    "value": "**`/bugmove`**`<source position> <target position>`"
+                  },
+                  {
+                    "name": "Respond to bug report",
+                    "value": "**`/bugrespond`**`<position> <response>`"
+                  }
+                ]
+              }
+            };
+            var notadminData = {
+                "embed": {
+                  "fields": [
+                    {
+                      "name": "Add bug report",
+                      "value": "**`/bug`**`<bug title> `**`/details`**`<more details about the bug> `**`/platform`**`<name of the platform the bug is occuring on> `**`/severity`**`<how bad the bug is, from 1-10>`"
+                    },
+                    {
+                      "name": "View bug reports",
+                      "value": "**`/bugs`**",
+                      "inline": true
+                    }
+                  ]
+                }
+              };
+            if(message.member.roles.IsAdmin()) bot.createMessage(message.channel.id, adminData);
+            else bot.createMessage(message.channel.id, notadminData);
+        }
         else if (message.content.toLowerCase().trim() == "/buglist" || message.content.toLowerCase().trim() == "/bugs") {
             db.collection("bugs").find().toArray(function (error, results) {
                 if (error) bot.createMessage(message.channel.id, "Database error:" + error);
@@ -89,7 +142,7 @@ bot.on('messageCreate', (message) => {
             });
         } 
         else if (message.content.toLowerCase().trim().startsWith("/bugrespond") || message.content.toLowerCase().trim().startsWith("/buganswer")) {
-            if(!message.member.permission.has("manageGuild")){
+            if(!message.member.roles.IsAdmin()){
                 bot.createMessage(message.channel.id, "You're not allowed to do that " + message.author.mention);
                 return;
             }
@@ -111,7 +164,7 @@ bot.on('messageCreate', (message) => {
             }
         } 
         else if (message.content.toLowerCase().trim().startsWith("/bugremove") || message.content.toLowerCase().trim().startsWith("/bugdelete")) {
-            if(!message.member.permission.has("manageGuild")){
+            if(!message.member.roles.IsAdmin()){
                 bot.createMessage(message.channel.id, "You're not allowed to do that " + message.author.mention);
                 return;
             }
@@ -157,7 +210,7 @@ bot.on('messageCreate', (message) => {
             }
         } 
         else if (message.content.toLowerCase().trim().startsWith("/bugmove")) {
-            if(!message.member.permission.has("manageGuild")){
+            if(!message.member.roles.IsAdmin()){
                 bot.createMessage(message.channel.id, "You're not allowed to do that " + message.author.mention);
                 return;
             }
