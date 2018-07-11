@@ -255,6 +255,11 @@ bot.on('messageCreate', (message) => {
                     position: position,
                     username: username
                 };
+                if(!title.trim()){
+                    bot.createMessage(message.channel.id, "You must give your bug report a title!");
+                    return;
+                }
+                
                 db.collection("bugs").insert(newObject, null, function (error, results) {
                     if (error) bot.createMessage(message.channel.id, "Failed to add bug report to database!");
                     const data = {
