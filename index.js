@@ -78,15 +78,18 @@ bot.on('messageCreate', (message) => {
                 var count = 0;
                 results.sort(function(a, b){return a.position-b.position});
                 results.forEach(function (i, obj) {
-                    if (i.details == "") i.details = "No details";
-                    resultstring += "`" + i.position + "`: **" + i.title + "**, " + i.details.trim() + " *(submitted by " + i.username + ")*\n";
+                    if(!i.details.trim()) i.details = " ";
+                    if(!i.title.trim()) i.title = "`<missing title>`";
+                    if(!i.username.trim()) i.username = "`<missing username>`";
+                    if(!i.position.trim()) i.position = "0";
+                    resultstring += "`" + i.position + "`: **" + i.title.trim() + "**, " + i.details.trim() + " *(submitted by " + i.username + ")*\n";
                     count++;
                 });
                 bot.createMessage(message.channel.id, resultstring);
             });
         } 
         else if (message.content.toLowerCase().trim().startsWith("/bugrespond") || message.content.toLowerCase().trim().startsWith("/buganswer")) {
-            var searchstring = message.content.toLowerCase().trim().replace("/bugrespond", "").replace("/buganswer", "").trim();
+            var searchstring = message.content.trim().replace("/bugrespond", "").replace("/buganswer", "").trim();
             var bugposition = searchstring;
             var responsestring;
             if (!isInt(bugposition)) {
@@ -146,12 +149,23 @@ bot.on('messageCreate', (message) => {
                                     else {
                                         db.collection("bugs").find().toArray(function (error, results) {
                                             results.sort(function(a, b){return a.position-b.position});
+                                            
                                             var reordered = array_move(results, startposition-1, endposition-1);
                                             for(var i = 0; i < reordered.length; i++){
                                                 reordered[i].position = i+1;
+                                            }
+                                            reordered.sort(function(a, b){return a.position-b.position});
+                                            var resultstring = "*New bug report list:*\n";
+                                            for(var i = 0; i < reordered.length; i++){
+                                                if(!reordered[i].details) reordered[i].details = " ";
+                                                if(!reordered[i].title) reordered[i].title = "`<missing title>`";
+                                                if(!reordered[i].username) reordered[i].username = "`<missing username>`";
+                                                if(!reordered[i].position) reordered[i].position = "0";
+                                                resultstring += "`" + reordered[i].position + "`: **" + reordered[i].title.trim() + "**, " + reordered[i].details.trim() + " *(submitted by " + reordered[i].username + ")*\n";
                                                 if(results[i]._id != reordered[i]._id)
                                                     db.collection("bugs").updateOne({ _id: reordered[i]._id }, { $set: { "position": reordered[i].position }});
                                             }
+                                            bot.createMessage(message.channel.id, resultstring);
                                         });
                                     }
                                 });
