@@ -6,23 +6,23 @@ require("dotenv").config();
 
 var db;
 
-MongoClient.connect(process.env.databaseurl, function(err, client) {
-    if(err) console.log("Failed to connect to database")
+MongoClient.connect(process.env.databaseurl, function (err, client) {
+    if (err) console.log("Failed to connect to database")
     else console.log("Connected successfully to database");
     db = client.db("bugboyreports");
-  });
-  
+});
+
 ///////////////////////
 //// UTILS ///////////
 /////////////////////
 const catchAsync = fn => (
     (req, res, next) => {
-      const routePromise = fn(req, res, next);
-      if (routePromise.catch) {
-        routePromise.catch(err => next(err));
-      }
+        const routePromise = fn(req, res, next);
+        if (routePromise.catch) {
+            routePromise.catch(err => next(err));
+        }
     }
-  );
+);
 
 /////////////////////////
 ////  DISCORD BOT  /////
@@ -39,7 +39,25 @@ bot.on('ready', () => {
 function isInt(value) {
     var x = parseFloat(value);
     return !isNaN(value) && (x | 0) === x;
-  }
+}
+function array_move(inputArray, old_index, new_index) {
+    var arr = inputArray.slice(0);
+
+    while (old_index < 0) {
+        old_index += arr.length;
+    }
+    while (new_index < 0) {
+        new_index += arr.length;
+    }
+    if (new_index >= arr.length) {
+        var k = new_index - arr.length;
+        while ((k--) + 1) {
+            arr.push(undefined);
+        }
+    }
+     arr.splice(new_index, 0, arr.splice(old_index, 1)[0]);  
+   return arr;
+}
 
 bot.on('messageCreate', (message) => {
     // So the bot doesn't reply to iteself
@@ -51,59 +69,96 @@ bot.on('messageCreate', (message) => {
     if (message.content.toLowerCase().trim().startsWith("/bug")) {
         if (message.content.toLowerCase().trim() == "/bug") {
             bot.createMessage(message.channel.id, "To report a bug, please use the following template: **/bug** `name and short description of the bug` **/platform** `All, Xbox, Mobile, PC, Hololens, Other` **/details** `More details about the bug` **/severity** `How bad is it, from 1-10?`. All fields are optional, except for the title. \n You can also use the 'Report Bug' menu from within Discord UWP.")
-        }
+        } 
         else if (message.content.toLowerCase().trim() == "/buglist") {
             db.collection("bugs").find().toArray(function (error, results) {
-                if (error) bot.createMessage(message.channel.id, "Database error:"+error);
-                if(results == null) bot.createMessage(message.channel.id, "Empty database!");
+                if (error) bot.createMessage(message.channel.id, "Database error:" + error);
+                if (results == null) bot.createMessage(message.channel.id, "Empty database!");
                 var resultstring = "";
                 var count = 0;
-                results.forEach(function(i, obj) {
-                    if(i.details == "") i.details = "No details";
-                    resultstring+= "`"+i.position + "`: **"+ i.title + "**, "+i.details.trim()+" *(submitted by " + i.username+")*\n" ;
+                results.sort(function(a, b){return a.position-b.position});
+                results.forEach(function (i, obj) {
+                    if (i.details == "") i.details = "No details";
+                    resultstring += "`" + i.position + "`: **" + i.title + "**, " + i.details.trim() + " *(submitted by " + i.username + ")*\n";
                     count++;
                 });
                 bot.createMessage(message.channel.id, resultstring);
             });
-        }
-        else if (message.content.toLowerCase().trim().startsWith("/bugrespond") | message.content.toLowerCase().trim().startsWith("/buganswer")) {
-            var searchstring = message.content.toLowerCase().trim().replace("/bugrespond","").replace("/buganswer","").trim();
+        } 
+        else if (message.content.toLowerCase().trim().startsWith("/bugrespond") || message.content.toLowerCase().trim().startsWith("/buganswer")) {
+            var searchstring = message.content.toLowerCase().trim().replace("/bugrespond", "").replace("/buganswer", "").trim();
             var bugposition = searchstring;
             var responsestring;
-            if(!isInt(bugposition)){
+            if (!isInt(bugposition)) {
                 var bugposition = searchstring.substring(0, searchstring.indexOf(' '));
                 responsestring = searchstring.substring(bugposition.length);
             }
-            if(isInt(bugposition)){
-                if(responsestring == "" || responsestring == undefined) responsestring = " ";
-                db.collection("bugs").updateOne({ position: parseInt(bugposition) }, {
-                    $set: { "response": responsestring },
-                }, function(err, client) {
-                    if(err) bot.createMessage(message.channel.id, "Failed to respond!");
-                    else if(responsestring == " ") bot.createMessage(message.channel.id, "Removed resonse from bug report " + bugposition + "!");
-                    else bot.createMessage(message.channel.id, "Responded `"+responsestring+"` to bug report " + bugposition + "!");
-                  }
-                )
+            if (isInt(bugposition)) {
+                if (responsestring == "" || responsestring == undefined) responsestring = " ";
+                db.collection("bugs").updateOne({ position: parseInt(bugposition) }, { $set: { "response": responsestring },
+                }, function (err, client) {
+                    if (err) bot.createMessage(message.channel.id, "Failed to respond!");
+                    else if (responsestring == " ") bot.createMessage(message.channel.id, "Removed resonse from bug report " + bugposition + "!");
+                    else bot.createMessage(message.channel.id, "Responded `" + responsestring + "` to bug report " + bugposition + "!");
+                })
             }
-        }
-        else if (message.content.toLowerCase().trim().startsWith("/bugremove")) {
-            var searchstring = message.content.toLowerCase().trim().replace("/bugremove","").trim();
+        } 
+        else if (message.content.toLowerCase().trim().startsWith("/bugremove") || message.content.toLowerCase().trim().startsWith("/bugdelete")) {
+            var searchstring = message.content.toLowerCase().trim().replace("/bugremove", "").trim();
             var bugposition = searchstring;
-            if(!isInt(bugposition)){
+            if (!isInt(bugposition)) {
                 var bugposition = searchstring.substring(0, searchstring.indexOf(' '));
             }
-            if(isInt(bugposition)){
-                db.collection("bugs").findOne({ position: parseInt(bugposition) }, true,
-                function(err, client) {
-                    if(client == null) bot.createMessage(message.channel.id, "That bug doesn't exist!");
-                    else {
-                        db.collection("bugs").remove({ position: parseInt(bugposition) });
-                        bot.createMessage(message.channel.id, "Removed bug report `"+bugposition+"`");
+            if (isInt(bugposition)) {
+                db.collection("bugs").findOne({position: parseInt(bugposition)}, true,
+                    function (err, client) {
+                        if (client == null) bot.createMessage(message.channel.id, "That bug doesn't exist!");
+                        else {
+                            db.collection("bugs").remove({
+                                position: parseInt(bugposition)
+                            });
+                            bot.createMessage(message.channel.id, "Removed bug report `" + bugposition + "`");
+                        }
                     }
-                  }
                 )
             }
-        }
+        } 
+        else if (message.content.toLowerCase().trim().startsWith("/bugmove")) {
+            var searchstring = message.content.toLowerCase().trim().replace("/bugmove", "").trim();
+            var values = searchstring.split(/[^\d]+/);
+            if (values.length < 2) {
+                bot.createMessage(message.channel.id, "Invalid positions!");
+            } 
+            else {
+                var startposition = parseInt(values[0]);
+                var endposition = parseInt(values[1]);
+                if(startposition == endposition){
+                    bot.createMessage(message.channel.id, "You can't move something where it already is");
+                    return;
+                }
+                db.collection("bugs").findOne({position: parseInt(startposition)}, true,
+                    function (err, client) {
+                        if (client == null) bot.createMessage(message.channel.id, "The bug you want to move doesn't exist!");
+                        else {
+                            db.collection("bugs").findOne({position: parseInt(endposition)}, true,
+                                function (err, client) {
+                                    if (client == null) bot.createMessage(message.channel.id, "The target destination doesn't exist!");
+                                    else {
+                                        db.collection("bugs").find().toArray(function (error, results) {
+                                            results.sort(function(a, b){return a.position-b.position});
+                                            var reordered = array_move(results, startposition-1, endposition-1);
+                                            for(var i = 0; i < reordered.length; i++){
+                                                reordered[i].position = i+1;
+                                                if(results[i]._id != reordered[i]._id)
+                                                    db.collection("bugs").updateOne({ _id: reordered[i]._id }, { $set: { "position": reordered[i].position }});
+                                            }
+                                        });
+                                    }
+                                });
+                        }
+                    });
+                }
+            }
         else {
             //parameters are: bug title, platform, details, or severity
             var lcm = message.content.toLowerCase();
@@ -146,7 +201,10 @@ bot.on('messageCreate', (message) => {
             var checknames = function (array, name) {
                 if (!foundPL)
                     array.forEach((str) => {
-                        if (!foundPL && str == platform.toLowerCase().trim()) { platform = name; foundPL = true; }
+                        if (!foundPL && str == platform.toLowerCase().trim()) {
+                            platform = name;
+                            foundPL = true;
+                        }
                     });
             }
 
@@ -172,54 +230,60 @@ bot.on('messageCreate', (message) => {
             if (severity == NaN) severity = undefined;
             else if (severity > 10) severity = 10;
             else if (severity < 1) severity = 1;
-            
+
             db.collection("bugs").find().toArray(function (error, results) {
-            var position = results[results.length-1].position+1;
-            var newObject = { title:title, details:details, platform:platform, severity:severity, position:position, username:username };  
-            db.collection("bugs").insert(newObject, null, function (error, results) {
-                if (error)  bot.createMessage(message.channel.id, "Failed to add bug report to database!");
-                const data = {
-                    "embed": {
-                      "title": "Added bug report:",
-                      "url": "https://bugboy.herokuapp.com/",
-                      "color": SeverityToColor(severity),
-                      "footer": {
-                        "text": "Platform:" + platform + " | Severity: " + severity + " | Submitted by " + username
-                      },
-                      "fields": [
-                        {
-                          "name": "`"+position+"`: "+ title,
-                          "value": details
+                var position = results[results.length - 1].position + 1;
+                var newObject = {
+                    title: title,
+                    details: details,
+                    platform: platform,
+                    severity: severity,
+                    position: position,
+                    username: username
+                };
+                db.collection("bugs").insert(newObject, null, function (error, results) {
+                    if (error) bot.createMessage(message.channel.id, "Failed to add bug report to database!");
+                    const data = {
+                        "embed": {
+                            "title": "Added bug report:",
+                            "url": "https://bugboy.herokuapp.com/",
+                            "color": SeverityToColor(severity),
+                            "footer": {
+                                "text": "Platform:" + platform + " | Severity: " + severity + " | Submitted by " + username
+                            },
+                            "fields": [{
+                                "name": "`" + position + "`: " + title,
+                                "value": details
+                            }]
                         }
-                      ]
-                    }
-                  };
-                  bot.createMessage(message.channel.id, data);
-              
+                    };
+                    bot.createMessage(message.channel.id, data);
+
+                });
             });
-        });
         }
     }
 });
 
 bot.connect();
 
-function SeverityToColor(input){
-    if(input == 1 || input == 2) return 2079491;
-    else if(input == 3 || input == 4) return 233659;
-    else if(input == 5 || input == 6) return 14069504;
-    else if(input == 7 || input == 8) return 12282627;
-    else if(input == 9 || input == 10) return 12269315;
+function SeverityToColor(input) {
+    if (input == 1 || input == 2) return 2079491;
+    else if (input == 3 || input == 4) return 233659;
+    else if (input == 5 || input == 6) return 14069504;
+    else if (input == 7 || input == 8) return 12282627;
+    else if (input == 9 || input == 10) return 12269315;
 }
-function reorderbugreports(removedpos){
+
+function reorderbugreports(removedpos) {
     db.collection("bugs").find().toArray(function (error, results) {
-        if (error) bot.createMessage(message.channel.id, "Database error:"+error);
-        if(results == null) bot.createMessage(message.channel.id, "Empty database!");
+        if (error) bot.createMessage(message.channel.id, "Database error:" + error);
+        if (results == null) bot.createMessage(message.channel.id, "Empty database!");
         var resultstring = "";
         var count = 0;
-        results.forEach(function(i, obj) {
-            if(i.position < removedpos) i.details = "No details";
-            resultstring+=  + "`: **"+ i.title + "**, *"+i.details+"*\n `"+i.position+"`";
+        results.forEach(function (i, obj) {
+            if (i.position < removedpos) i.details = "No details";
+            resultstring += +"`: **" + i.title + "**, *" + i.details + "*\n `" + i.position + "`";
             count++;
         });
         bot.createMessage(message.channel.id, resultstring);
@@ -251,15 +315,19 @@ app.set('view engine', 'ejs');
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({
+    extended: false
+}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.get('/', function(req, res, next) {
+app.get('/', function (req, res, next) {
     db.collection("bugs").find().toArray(function (error, results) {
         if (error) throw error
-        else res.render('index', {bugs:results});  
-  })
+        else res.render('index', {
+            bugs: results
+        });
+    })
 });
 
 app.use('/users', users);
