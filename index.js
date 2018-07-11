@@ -60,7 +60,7 @@ function array_move(inputArray, old_index, new_index) {
    return arr;
 }
 
-bot.on('messageCreate', async (message) => {
+bot.on('messageCreate', (message) => {
     // So the bot doesn't reply to iteself
     if (message.author.bot) return;
 
@@ -123,33 +123,37 @@ bot.on('messageCreate', async (message) => {
             else{
                 var deletecount = 0;
                 var failedtodelete = [];
-                await forEach(values, async (value) => {
+                forEach(values, async (value) => {
                     value = parseInt(value);
                     if(isInt(value)){
-                        await db.collection("bugs").remove({
+                        db.collection("bugs").remove({
                             position: value}, function (err, client){
                             if(err != null || client.result.n == 0)
                                 failedtodelete.push("`"+value+"`");
-                            else
+                            else{
                                 deletecount++;
-                        })
+                            }
+                            if(failedtodelete.length + deletecount == values.length){
+                                console.log("Started reorder operation");
+                                var responsecontent = "";
+                                if(deletecount == 1) responsecontent = "Deleted bug report";
+                                else if(deletecount != 0) responsecontent = "Deleted " + deletecount + " bug reports";
+                                if(failedtodelete.length>0){
+                                    if(deletecount == 0) responsecontent = "Failed to delete "+ failedtodelete.join(", ");
+                                    else responsecontent += ", but failed to delete "+ failedtodelete.join(", ");
+                                }
+                                responsecontent+=".";
+                                bot.createMessage(message.channel.id, responsecontent);
+                                db.collection("bugs").find().toArray(function (error, results) {
+                                    for(var pos = 0; pos < results.length; pos++){
+                                        if(results[pos].position != pos+1)
+                                        db.collection("bugs").updateOne({ _id: results[pos]._id }, { $set: { "position": pos+1 }});
+                                    }
+                                });
+                            }
+                        });
                     }
-                });
-                var responsecontent = "";
-                if(deletecount == 1) responsecontent = "Deleted bug report";
-                else if(deletecount != 0) responsecontent = "Deleted " + deletecount + " bug reports";
-                if(failedtodelete.length>0){
-                    if(deletecount == 0) responsecontent = "Failed to delete "+ failedtodelete.join(", ");
-                    else responsecontent = ", but failed to delete "+ failedtodelete.join(", ");
-                }
-                responsecontent+=".";
-                bot.createMessage(message.channel.id, responsecontent);
-                db.collection("bugs").find().toArray(function (error, results) {
-                    for(var pos = 0; pos < results.length; pos++){
-                        if(results[pos].position != pos+1)
-                        db.collection("bugs").updateOne({ _id: results[pos]._id }, { $set: { "position": pos+1 }});
-                    }
-                });
+                })
             }
         } 
         else if (message.content.toLowerCase().trim().startsWith("/bugmove")) {
