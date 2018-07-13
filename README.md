@@ -1,3 +1,5 @@
+*This is a WIP project, so some stuff is unfinished (such as the web interface). However everything listed below works fine.*
+
 # BugBoy
 
 BugBoy is a Discord bot and web interface built using Node.JS. It serves as a simple way of tracking bugs.
