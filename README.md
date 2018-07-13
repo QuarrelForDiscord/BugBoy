@@ -20,13 +20,12 @@ By default, platform is set to `all` and "severity" is set to `1`.
 | Action      | Command(s)                      | Description                             | Example   |
 | ----------- | ------------------------------- | --------------------------------------- | --------- |
 | View help   | **`/bug`**         | View all commands available to the user who asked    |           |
-| View help   | **`/bugboy`**         | View information about the node proces|           |           |
 | List bugs   | **`/bugs`**, `/buglist`         | List all the bugs                       |           |
 | Remove a bug | **`/bugremove`**, `/bugdelete` | Remove all bugs, specified by position. | `/bugremove 4, 12 2 and 3` |
 | Mark a bug as fixed | **`/bugfix`** | Mark a bug as fixed | `/bugfix 2, 3` |
 | Respond to a bug | **`/bugrespond`**, `/buganswer` | Add a response to the bug specified by index | `/bugrespond 12 this is kind of fixed` |
 | Move a bug | **`/bugmove`** | Move a bug from it's first position to a new one | `/bugmove 12 to 1` |
-
+| Bot info   | **`/bugboy`**         | View information about the node process |           |           |
 
 ### Notes
 
