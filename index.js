@@ -4,16 +4,7 @@ const ejs = require("ejs");
 const { forEach } = require('p-iteration');
 
 require("dotenv").config();
-Array.prototype.IsAdmin = function(){
-    var adminroleids = ["304059525990973450", "302800337306255362"]
-    for(var i = 0; i < adminroleids.length; i++){
-        for(var j = 0; j < this.length; j++){
-            if(adminroleids[i]==this[j]){
-                return true;
-            }
-        }
-    }
-}
+
 var db;
 
 MongoClient.connect(process.env.databaseurl, function (err, client) {
@@ -33,6 +24,30 @@ const catchAsync = fn => (
         }
     }
 );
+function formatTime(seconds){
+    function pad(s){
+      return (s < 10 ? '0' : '') + s;
+    }
+    var hours = Math.floor(seconds / (60*60));
+    var minutes = Math.floor(seconds % (60*60) / 60);
+    var seconds = Math.floor(seconds % 60);
+  
+    return pad(hours) + ':' + pad(minutes) + ':' + pad(seconds);
+  }
+  Array.prototype.IsAdmin = function(){
+    var adminroleids = ["304059525990973450", "302800337306255362"]
+    for(var i = 0; i < adminroleids.length; i++){
+        for(var j = 0; j < this.length; j++){
+            if(adminroleids[i]==this[j]){
+                return true;
+            }
+        }
+    }
+}
+Array.prototype.diff = function(a) {
+    return this.filter(function(i) {return a.indexOf(i) < 0;});
+};
+
 
 /////////////////////////
 ////  DISCORD BOT  /////
@@ -91,8 +106,17 @@ bot.on('messageCreate', (message) => {
                     "inline": true
                   },
                   {
-                    "name": "Delete bug report (multiple positions accepted)",
-                    "value": "**`/bugremove`**`<position>`"
+                    "name": "View bot info",
+                    "value": "**`/bugboy`**",
+                    "inline": true
+                  },
+                  {
+                    "name": "Delete bug reports",
+                    "value": "**`/bugremove`**`<positions>`"
+                  },
+                  {
+                    "name": "Toggle \"fixed\" status of bug reports",
+                    "value": "**`/bugfix`**`<positions>`"
                   },
                   {
                     "name": "Move bug report",
@@ -116,6 +140,11 @@ bot.on('messageCreate', (message) => {
                       "name": "View bug reports",
                       "value": "**`/bugs`**",
                       "inline": true
+                    },
+                    {
+                      "name": "View bot info",
+                      "value": "**`/bugboy`**",
+                      "inline": true
                     }
                   ]
                 }
@@ -134,7 +163,9 @@ bot.on('messageCreate', (message) => {
                     if(!i.details) i.details = " ";
                     if(!i.title) i.title = "`<missing title>`";
                     if(!i.username) i.username = "`<missing username>`";
-                    resultstring += "`" + i.position + "`: **" + i.title.trim() + "**, " + i.details.trim() + " *(submitted by " + i.username + ")*\n";
+                    var striked = "";
+                    if(i.fixed) striked = "~~";
+                    resultstring += "`" + i.position + "`:"+striked+" **" + i.title.trim() + "**, " + i.details.trim() + " *(" + i.username + ")*"+striked+"\n";
                     count++;
                 });
                 bot.createMessage(message.channel.id, resultstring);
@@ -208,6 +239,48 @@ bot.on('messageCreate', (message) => {
                 })
             }
         } 
+        else if (message.content.toLowerCase().trim().startsWith("/bugfix")) {
+            if(!message.member.roles.IsAdmin()){
+                bot.createMessage(message.channel.id, "You're not allowed to do that " + message.author.mention);
+                return;
+            }
+            var searchstring = message.content.toLowerCase().trim().replace("/bugfix", "").trim();
+            var values = searchstring.split(/[^\d]+/);
+            if (values.length < 1) {
+                bot.createMessage(message.channel.id, "You need to provide the position of at least one bug. You can mark more than one as fixed by seperating the positions with non-numeric characters.");
+            }
+            else{
+                var failedtomodify = [];
+                var modifycount = 0;
+                db.collection("bugs").find().toArray(function (error, results) {
+                    forEach(values, async (value) => {
+                        if(isInt(value)){
+                            var sucess = false;
+                            forEach(results, async (result) => {
+                                 if(result.position == value){
+                                    sucess = true;
+                                    modifycount++;
+                                    db.collection("bugs").updateOne({ _id: result._id }, { $set: { "fixed": !result.fixed }});
+                                 }
+                            }).then( function(){
+                                if(!sucess) failedtomodify.push("`"+value+"`");
+                                if(value == values[values.length-1]){
+                                    var responsecontent = "";
+                                    if(modifycount == 1) responsecontent = "Modified bug report";
+                                    else if(modifycount != 0) responsecontent = "Modified " + modifycount + " bug reports";
+                                    if(failedtomodify.length>0){
+                                        if(modifycount == 0) responsecontent = "Failed to modify "+ failedtomodify.join(", ");
+                                        else responsecontent += ", but failed to modify "+ failedtomodify.join(", ");
+                                    }
+                                    responsecontent+=".";
+                                    bot.createMessage(message.channel.id, responsecontent);
+                                }
+                            });
+                        }
+                    });
+                });
+            }
+        }
         else if (message.content.toLowerCase().trim().startsWith("/bugmove")) {
             if(!message.member.roles.IsAdmin()){
                 bot.createMessage(message.channel.id, "You're not allowed to do that " + message.author.mention);
@@ -259,6 +332,31 @@ bot.on('messageCreate', (message) => {
                     });
                 }
             }
+        else if(message.content.toLowerCase().trim() == "/bugboy"){
+            const data = {
+                "embed": {
+                  "url": "https://discordapp.com",
+                  "fields": [
+                    {
+                      "name": "Process ID:",
+                      "value": "`" + process.pid + "`",
+                      "inline": true
+                    },
+                    {
+                      "name": "Platform:",
+                      "value": "`" + process.platform + "`",
+                      "inline": true
+                    },
+                    {
+                        "name": "Uptime:",
+                        "value": "`" + formatTime(process.uptime()) + "`",
+                        "inline": true
+                      },
+                  ]
+                }
+              };
+            bot.createMessage(message.channel.id, data);
+        }
         else {
             var lcm = message.content.toLowerCase();
             var indexes = [];

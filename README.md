@@ -19,8 +19,11 @@ By default, platform is set to `all` and "severity" is set to `1`.
 
 | Action      | Command(s)                      | Description                             | Example   |
 | ----------- | ------------------------------- | --------------------------------------- | --------- |
+| View help   | **`/bug`**         | View all commands available to the user who asked    |           |
+| View help   | **`/bugboy`**         | View information about the node proces|           |           |
 | List bugs   | **`/bugs`**, `/buglist`         | List all the bugs                       |           |
 | Remove a bug | **`/bugremove`**, `/bugdelete` | Remove all bugs, specified by position. | `/bugremove 4, 12 2 and 3` |
+| Mark a bug as fixed | **`/bugfix`** | Mark a bug as fixed | `/bugfix 2, 3` |
 | Respond to a bug | **`/bugrespond`**, `/buganswer` | Add a response to the bug specified by index | `/bugrespond 12 this is kind of fixed` |
 | Move a bug | **`/bugmove`** | Move a bug from it's first position to a new one | `/bugmove 12 to 1` |
 
@@ -29,5 +32,5 @@ By default, platform is set to `all` and "severity" is set to `1`.
 
 * Anyone can report a bug, or view the bug report list, but only members with the "Edit Guild" permission can use the other commands.
 
-* The `/bugremove` and `/bugmove` can have any non-numeric characters between the bug report position. For example, `/bugmove 12 2` is just as valid as `/bugmove 12hello2` or `/bugmove 12 to the position 2`.
+* The `/bugremove`, `/bugfix`, and`/bugmove` commands can have any non-numeric characters between the bug report positions. For example, `/bugmove 12 2` is just as valid as `/bugmove 12hello2` or `/bugmove 12 to the position 2`.
 
