@@ -29,7 +29,12 @@ By default, platform is set to `all` and "severity" is set to `1`.
 
 ### Notes
 
-* Anyone can report a bug, or view the bug report list, but only members with the "Edit Guild" permission can use the other commands.
+* Anyone can report a bug, or view the bug report list, but only members with a role ID that exists in the `adminroleids` array ([index.js:38](https://github.com/QuarrelForDiscord/BugBoy/blob/master/index.js#L38)) can use the other commands.
 
-* The `/bugremove`, `/bugfix`, and`/bugmove` commands can have any non-numeric characters between the bug report positions. For example, `/bugmove 12 2` is just as valid as `/bugmove 12hello2` or `/bugmove 12 to the position 2`.
+* The `/bugremove`, `/bugfix`, and`/bugmove` commands can have any non-numeric characters between the bug report positions. For example, `/bugmove 12 2` is just as valid as `/bugmove 12hello2` or `/bugmove 12 to the position 2`. This makes it easy to use extremely human-readable and intuitive commands.
 
+* BugBoy does not differentiate between servers, adding a bug report in server A will show up in server B.
+
+## Installing to your server
+
+* To run an instance of BugBoy, you simply need to specify the URL of your MongoDB database as a `databaseurl` environment variable and your bot's token as a `bottoken` environment variable. [dot-env](https://www.npmjs.com/package/dotenv) is great for this.
