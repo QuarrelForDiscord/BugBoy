@@ -370,7 +370,7 @@ bot.on('messageCreate', (message) => {
         }
         else {
             var matches = message.content.replace("/bug","").trim().match(/[\d]+/);
-            if(matches.length > 0){
+            if(matches){
                 db.collection("bugs").find({ position: parseInt(matches[0]) }).toArray(function (error, results) {
                 if (error != null || results==0) bot.createMessage(message.channel.id, "Bug report doesn't exist!");
                 else{
@@ -464,6 +464,7 @@ bot.on('messageCreate', (message) => {
             else if (severity < 1) severity = 1;
 
             db.collection("bugs").find().toArray(function (error, results) {
+                results.sort(function(a, b){return a.position-b.position});
                 var position = results[results.length - 1].position + 1;
                 var newObject = {
                     title: title,
