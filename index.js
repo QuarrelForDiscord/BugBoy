@@ -369,7 +369,7 @@ bot.on('messageCreate', (message) => {
             bot.createMessage(message.channel.id, data);
         }
         else {
-            var matches = message.content.replace("/bug","").trim().match(/[\d]+/);
+            var matches = message.content.replace("/bug","").trim().match(/^[0-9]+$/);
             if(matches){
                 db.collection("bugs").find({ position: parseInt(matches[0]) }).toArray(function (error, results) {
                 if (error != null || results==0) bot.createMessage(message.channel.id, "Bug report doesn't exist!");
