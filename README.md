@@ -23,6 +23,7 @@ By default, platform is set to `all` and "severity" is set to `1`.
 | ----------- | ------------------------------- | --------------------------------------- | --------- |
 | View help   | **`/bug`**         | View all commands available to the user who asked    |           |
 | List bugs   | **`/bugs`**, `/buglist`         | List all the bugs                       |           |
+| View bug details   | **`/bug`**         | View details about a specific bug, specified by index    | `/bug 4`|
 | Remove a bug | **`/bugremove`**, `/bugdelete` | Remove all bugs, specified by position. | `/bugremove 4, 12 2 and 3` |
 | Mark a bug as fixed | **`/bugfix`** | Mark a bug as fixed | `/bugfix 2, 3` |
 | Respond to a bug | **`/bugrespond`**, `/buganswer` | Add a response to the bug specified by index | `/bugrespond 12 this is kind of fixed` |

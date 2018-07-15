@@ -83,34 +83,26 @@ function array_move(inputArray, old_index, new_index) {
      arr.splice(new_index, 0, arr.splice(old_index, 1)[0]);  
    return arr;
 }
-var buglists = [];
-var lastbugsId;
-bot.on("messageReactionAdd", (message, emoji, userid)=>{
-    if(userid == bot.user.id) return;
-    if(emoji.name == "⬅" || emoji.name == "➡"){
-        if(message.id == lastbugsId){
-            var pagevalues = message.embeds[0].footer.text.replace("Page ","").split("/");
-                var newpagevalue = pagevalues[0];
-                if(emoji.name == "⬅"){
-                    if(newpagevalue == 0) return;
-                    newpagevalue--;
-                }
-                else if(emoji.name == "➡"){
-                    if(newpagevalue == buglists.length) return;
-                    newpagevalue++;
-                }
-                const data = {
-                    "embed": {
-                      "description": buglists[newpagevalue-1],
-                      "footer": {
-                        "text": "Page "+newpagevalue+"/"+buglists.length,
-                      }
+function PublishBugsMessage(results, channelid){
+    var count = 0;
+                var buglists = [];
+                results.sort(function(a, b){return a.position-b.position});
+                results.forEach(function (i, obj) {
+                    var striked = "";
+                    if(i.fixed) striked = "~~";
+                    if(i.severity > 7) striked += "**";
+                    var newContent = "`" + i.position + "` "+striked + i.title.trim() +striked+"\n";
+                    if(buglists.length==0) buglists.push("");
+                    if((buglists[buglists.length-1]+newContent).length>2048){
+                        buglists.push("");
                     }
-                  };
-                bot.editMessage(message.channel.id, message.id, data);
-            }
-    };
-})
+                    buglists[buglists.length-1] += newContent;
+                    count++;
+                });
+                buglists.forEach(function(content){
+                    bot.createMessage(channelid, content);
+                });
+}
 bot.on('messageCreate', (message) => {
     // So the bot doesn't reply to iteself
     if (message.author.bot) return;
@@ -133,9 +125,12 @@ bot.on('messageCreate', (message) => {
                     "inline": true
                   },
                   {
+                    "name": "View bug report details",
+                    "value": "**`/bug`**`<bug position>`"
+                  },
+                  {
                     "name": "View bot info",
                     "value": "**`/bugboy`**",
-                    "inline": true
                   },
                   {
                     "name": "Delete bug reports",
@@ -169,6 +164,10 @@ bot.on('messageCreate', (message) => {
                       "inline": true
                     },
                     {
+                        "name": "View bug report details",
+                        "value": "**`/bug`**`<bug position>`"
+                      },
+                    {
                       "name": "View bot info",
                       "value": "**`/bugboy`**",
                       "inline": true
@@ -183,39 +182,9 @@ bot.on('messageCreate', (message) => {
             db.collection("bugs").find().toArray(function (error, results) {
                 if (error) bot.createMessage(message.channel.id, "Database error:" + error);
                 if (results == null) bot.createMessage(message.channel.id, "Empty database!");
-                var count = 0;
-                buglists = [];
-                results.sort(function(a, b){return a.position-b.position});
-                results.forEach(function (i, obj) {
-                    if(!i.details) i.details = " ";
-                    if(!i.title) i.title = "`<missing title>`";
-                    if(!i.username) i.username = "`<missing username>`";
-                    var striked = "";
-                    if(i.fixed) striked = "~~";
-                    var newContent = "`" + i.position + "`:"+striked+" **" + i.title.trim() + "**, " + i.details.trim() + " *(" + i.username + ")*"+striked+"\n";
-                    if(buglists.length==0) buglists.push("");
-                    if((buglists[buglists.length-1]+newContent).length>2048){
-                        buglists.push("");
-                    }
-                    buglists[buglists.length-1] += newContent;
-                    count++;
-                });
-                const data = {
-                    "embed": {
-                      "description": buglists[0],
-                      "footer": {
-                        "text": "Page 1/"+buglists.length,
-                      }
-                    }
-                  };
-                bot.createMessage(message.channel.id, data)
-                .then(function(message){
-                    lastbugsId = message.id;
-                    message.addReaction("⬅").then(function(){message.addReaction("➡")});
-                    ;
-                });
+                PublishBugsMessage(results, message.channel.id);
             });
-        } 
+        }
         else if (message.content.toLowerCase().trim().startsWith("/bugrespond") || message.content.toLowerCase().trim().startsWith("/buganswer")) {
             if(!message.member.roles.IsAdmin()){
                 bot.createMessage(message.channel.id, "You're not allowed to do that " + message.author.mention);
@@ -362,14 +331,11 @@ bot.on('messageCreate', (message) => {
                                             var resultstring = "*New bug report list:*\n";
                                             for(var i = 0; i < reordered.length; i++){
                                                 if(!reordered[i]) continue;
-                                                if(!reordered[i].details) reordered[i].details = " ";
-                                                if(!reordered[i].title) reordered[i].title = "`<missing title>`";
-                                                if(!reordered[i].username) reordered[i].username = "`<missing username>`";
-                                                resultstring += "`" + reordered[i].position + "`: **" + reordered[i].title.trim() + "**, " + reordered[i].details.trim() + " *(submitted by " + reordered[i].username + ")*\n";
-                                                if(results[i]._id != reordered[i]._id)
+                                                 if(results[i]._id != reordered[i]._id)
                                                     db.collection("bugs").updateOne({ _id: reordered[i]._id }, { $set: { "position": reordered[i].position }});
                                             }
-                                            bot.createMessage(message.channel.id, resultstring);
+                                            PublishBugsMessage(reordered, message.channel.id);
+                                            //bot.createMessage(message.channel.id, resultstring);
                                         });
                                     }
                                 });
@@ -403,6 +369,30 @@ bot.on('messageCreate', (message) => {
             bot.createMessage(message.channel.id, data);
         }
         else {
+            var matches = message.content.replace("/bug","").trim().match(/[\d]+/);
+            if(matches.length > 0){
+                db.collection("bugs").find({ position: parseInt(matches[0]) }).toArray(function (error, results) {
+                if (error != null || results==0) bot.createMessage(message.channel.id, "Bug report doesn't exist!");
+                else{
+                    var result = results[0];
+                    if(!result.details) result.details = "`<no details>`";
+                    const data = {
+                        "embed": {
+                            "color": SeverityToColor(result.severity),
+                            "footer": {
+                                "text": "Platform:" + result.platform + " | Severity: " + result.severity + " | Submitted by " + result.username
+                            },
+                            "fields": [{
+                                "name": "`" + result.position + "`: " + result.title,
+                                "value": result.details
+                            }]
+                        }
+                    };
+                    bot.createMessage(message.channel.id, data);
+                }
+            })
+                return;
+            }
             var lcm = message.content.toLowerCase();
             var indexes = [];
             var platformIndex = lcm.indexOf("/platform");
