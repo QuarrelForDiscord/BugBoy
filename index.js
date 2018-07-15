@@ -83,7 +83,34 @@ function array_move(inputArray, old_index, new_index) {
      arr.splice(new_index, 0, arr.splice(old_index, 1)[0]);  
    return arr;
 }
-
+var buglists = [];
+var lastbugsId;
+bot.on("messageReactionAdd", (message, emoji, userid)=>{
+    if(userid == bot.user.id) return;
+    if(emoji.name == "⬅" || emoji.name == "➡"){
+        if(message.id == lastbugsId){
+            var pagevalues = message.embeds[0].footer.text.replace("Page ","").split("/");
+                var newpagevalue = pagevalues[0];
+                if(emoji.name == "⬅"){
+                    if(newpagevalue == 0) return;
+                    newpagevalue--;
+                }
+                else if(emoji.name == "➡"){
+                    if(newpagevalue == buglists.length) return;
+                    newpagevalue++;
+                }
+                const data = {
+                    "embed": {
+                      "description": buglists[newpagevalue-1],
+                      "footer": {
+                        "text": "Page "+newpagevalue+"/"+buglists.length,
+                      }
+                    }
+                  };
+                bot.editMessage(message.channel.id, message.id, data);
+            }
+    };
+})
 bot.on('messageCreate', (message) => {
     // So the bot doesn't reply to iteself
     if (message.author.bot) return;
@@ -156,8 +183,8 @@ bot.on('messageCreate', (message) => {
             db.collection("bugs").find().toArray(function (error, results) {
                 if (error) bot.createMessage(message.channel.id, "Database error:" + error);
                 if (results == null) bot.createMessage(message.channel.id, "Empty database!");
-                var resultstring = "";
                 var count = 0;
+                buglists = [];
                 results.sort(function(a, b){return a.position-b.position});
                 results.forEach(function (i, obj) {
                     if(!i.details) i.details = " ";
@@ -165,10 +192,28 @@ bot.on('messageCreate', (message) => {
                     if(!i.username) i.username = "`<missing username>`";
                     var striked = "";
                     if(i.fixed) striked = "~~";
-                    resultstring += "`" + i.position + "`:"+striked+" **" + i.title.trim() + "**, " + i.details.trim() + " *(" + i.username + ")*"+striked+"\n";
+                    var newContent = "`" + i.position + "`:"+striked+" **" + i.title.trim() + "**, " + i.details.trim() + " *(" + i.username + ")*"+striked+"\n";
+                    if(buglists.length==0) buglists.push("");
+                    if((buglists[buglists.length-1]+newContent).length>2048){
+                        buglists.push("");
+                    }
+                    buglists[buglists.length-1] += newContent;
                     count++;
                 });
-                bot.createMessage(message.channel.id, resultstring);
+                const data = {
+                    "embed": {
+                      "description": buglists[0],
+                      "footer": {
+                        "text": "Page 1/"+buglists.length,
+                      }
+                    }
+                  };
+                bot.createMessage(message.channel.id, data)
+                .then(function(message){
+                    lastbugsId = message.id;
+                    message.addReaction("⬅").then(function(){message.addReaction("➡")});
+                    ;
+                });
             });
         } 
         else if (message.content.toLowerCase().trim().startsWith("/bugrespond") || message.content.toLowerCase().trim().startsWith("/buganswer")) {
