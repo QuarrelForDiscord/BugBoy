@@ -497,7 +497,7 @@ bot.on('messageCreate', (message) => {
                         }
                     };
                     bot.createMessage(message.channel.id, data);
-
+                    bot.deleteMessage(message.channel.id, message.id, "Bot clean-up");
                 });
             });
         }
