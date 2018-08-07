@@ -93,14 +93,23 @@ function PublishBugsMessage(results, channelid){
                     if(i.severity > 7) striked += "**";
                     var newContent = "`" + i.position + "` "+striked + i.title.trim() +striked+"\n";
                     if(buglists.length==0) buglists.push("");
-                    if((buglists[buglists.length-1]+newContent).length>2048){
+                    if((buglists[buglists.length-1]+newContent).length>2000){
                         buglists.push("");
                     }
                     buglists[buglists.length-1] += newContent;
                     count++;
                 });
-                buglists.forEach(function(content){
-                    bot.createMessage(channelid, content);
+                //With all my heart, I apologize for what follows:
+                bot.createMessage(channelid, buglists[0]).then(function(){
+                    if(buglists.length>=2)
+                    bot.createMessage(channelid, buglists[1]).then(function(){
+                        if(buglists.length>=3)
+                        bot.createMessage(channelid, buglists[2]).then(function(){
+                            if(buglists.length>=4)
+                            bot.createMessage(channelid, buglists[3]).then(function(){
+                            });
+                        });
+                    });
                 });
 }
 bot.on('messageCreate', (message) => {
