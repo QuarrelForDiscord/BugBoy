@@ -40,4 +40,34 @@ By default, platform is set to `all` and "severity" is set to `1`.
 
 ## Installing to your server
 
-* To run an instance of BugBoy, you simply need to specify the URL of your MongoDB database as a `databaseurl` environment variable and your bot's token as a `bottoken` environment variable. [dot-env](https://www.npmjs.com/package/dotenv) is great for this.
+Because of the way it works, BugBoy isn't a "public" bot you can just add to any server. You need to host it yourself.
+
+#### Prerequisites
+
+* A place that can run a node.js app (We use an Amazon EC2 server)
+
+* An MongoDB database (We use [https://mlab.com/](mLab))
+
+* A Discord bot application (You can create one [here](https://discordapp.com/developers/applications))
+
+#### Installation
+
+1. Login to your server with SSH
+
+2. Install node ([Very simple, just follow this](https://blog.kevinchisholm.com/amazon-web-services/aws-ec2-linux-instance-node-js-web-server/))
+
+3. Run `npm install git`
+
+4. Run `git clone https://github.com/QuarrelForDiscord/BugBoy.git`
+
+5. Create a new file called `.env` at the root of the repo you just cloned (`nano BugBoy/.env`)
+
+6. Now edit it so that it looks like this:
+```
+databaseurl=<The URL of you MongoDB database>
+bottoken=<The token of your Discord bot>
+```
+
+7. Now you could just run `node BugBoy/index.js`, but the process would shut down shortly after you close the SSH connection. So the better option is to install a utility called `forever` which will fix this issue. Run `npm install forever`.
+
+8. Now, to start your bot, simply run the command `forever start BugBoy/index.js`. 
