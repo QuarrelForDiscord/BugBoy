@@ -88,7 +88,8 @@ function PublishBugsMessage(results, channelid){
                 var buglists = [];
                 results.sort(function(a, b){return a.position-b.position});
                 results.forEach(function (i, obj) {
-                    var striked = "";
+                    if(i != undefined){
+                        var striked = "";
                     if(i.fixed) striked = "~~";
                     if(i.severity > 7) striked += "**";
                     var newContent = "`" + i.position + "` "+striked + i.title.trim() +striked+"\n";
@@ -97,6 +98,8 @@ function PublishBugsMessage(results, channelid){
                         buglists.push("");
                     }
                     buglists[buglists.length-1] += newContent;
+                    }
+                    
                     count++;
                 });
                 //With all my heart, I apologize for what follows:
@@ -192,6 +195,27 @@ bot.on('messageCreate', (message) => {
                 if (error) bot.createMessage(message.channel.id, "Database error:" + error);
                 if (results == null) bot.createMessage(message.channel.id, "Empty database!");
                 PublishBugsMessage(results, message.channel.id);
+            });
+        }
+        else if (message.content.toLowerCase().trim() == "/bugpurge") {
+            if(!message.member.roles.IsAdmin()){
+                bot.createMessage(message.channel.id, "You're not allowed to do that " + message.author.mention);
+                return;
+            }
+            db.collection("bugs").find().toArray(function (error, results) {
+                if (error) bot.createMessage(message.channel.id, "Database error:" + error);
+                if (results == null) bot.createMessage(message.channel.id, "Empty database!");
+                var counter = 0;
+                forEach(results, async (result) => {
+                    if(result.fixed){
+                        counter++;
+                        db.collection("bugs").remove({ _id: result._id });
+                    }
+                });
+                if(counter == 0)
+                    bot.createMessage(message.channel.id, "No fixed bugs to purge");
+                    else
+                    bot.createMessage(message.channel.id, "Removed " + counter + " fixed bugs");
             });
         }
         else if (message.content.toLowerCase().trim().startsWith("/bugrespond") || message.content.toLowerCase().trim().startsWith("/buganswer")) {
@@ -339,9 +363,11 @@ bot.on('messageCreate', (message) => {
                                             reordered.sort(function(a, b){return a.position-b.position});
                                             var resultstring = "*New bug report list:*\n";
                                             for(var i = 0; i < reordered.length; i++){
-                                                if(!reordered[i]) continue;
-                                                 if(results[i]._id != reordered[i]._id)
-                                                    db.collection("bugs").updateOne({ _id: reordered[i]._id }, { $set: { "position": reordered[i].position }});
+                                                if(!reordered[i]){}
+                                                else{
+                                                    if(results[i]._id != reordered[i]._id)
+                                                    db.collection("bugs").updateOne({ _id: reordered[i]._id }, { $set: { "position": reordered[i].position }})
+                                                };
                                             }
                                             PublishBugsMessage(reordered, message.channel.id);
                                             //bot.createMessage(message.channel.id, resultstring);
